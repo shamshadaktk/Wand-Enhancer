@@ -9,50 +9,123 @@
         d:DataContext="{d:DesignInstance local:MainWindowVm}"
         Title="WandEnhancer"
         Height="510" MaxHeight="510"
-        Width="780" MaxWidth="780" 
+        Width="780" MaxWidth="780"
         Opacity="0.97"
         Background="Transparent"
         WindowStyle="None"
         FontFamily="{StaticResource Inter}"
         AllowsTransparency="True">
-    <Border CornerRadius="7" Background="{DynamicResource Background}"
+    <Border CornerRadius="12" Background="{DynamicResource Background}"
             BorderBrush="{DynamicResource Border}"
             BorderThickness="1" Margin="10">
         <Border.Effect>
-            <DropShadowEffect BlurRadius="15" Direction="-90"
-                              RenderingBias="Quality" ShadowDepth="2"/>
+            <DropShadowEffect BlurRadius="22" Direction="-90"
+                              RenderingBias="Quality" ShadowDepth="3" Opacity="0.55"/>
         </Border.Effect>
-                
+
         <Grid>
             <Grid Background="Transparent" VerticalAlignment="Top"
-                  MouseLeftButtonDown="OnDragMove" Height="55">
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="25 0 0 0">
-                    <Viewbox VerticalAlignment="Center" Width="32" Height="32">
-                        <Path 
-                            Fill="White" Data="{StaticResource Logo}"/>
-                    </Viewbox>
+                  MouseLeftButtonDown="OnDragMove" Height="62">
+                <Border Height="2" CornerRadius="1" Margin="20 9 20 0" Opacity="0.85"
+                        VerticalAlignment="Top" Background="{DynamicResource AccentGradient}"/>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="20 6 0 0">
+                    <Border Width="36" Height="36" CornerRadius="10"
+                            Background="{DynamicResource AccentGradient}"
+                            VerticalAlignment="Center">
+                        <Border.Effect>
+                            <DropShadowEffect Color="{DynamicResource AccentColor}" BlurRadius="14"
+                                              ShadowDepth="0" Opacity="0.45" RenderingBias="Quality"/>
+                        </Border.Effect>
+                        <Viewbox VerticalAlignment="Center" HorizontalAlignment="Center" Width="22" Height="22">
+                            <Path Fill="White" Data="{StaticResource Logo}"/>
+                        </Viewbox>
+                    </Border>
                     <TextBlock Foreground="{DynamicResource Foreground}"
-                               FontWeight="SemiBold" Opacity="0.9"
+                               FontWeight="SemiBold"
                                VerticalAlignment="Center"
-                               FontSize="18" Margin="10 0 0 0">
-                        <Bold>
-                            WandEnhancer 
-                        </Bold>
-                    </TextBlock>
+                               FontSize="17" Margin="11 0 0 0"
+                               Text="WandEnhancer"/>
                     <TextBlock x:Name="VersionLabel" VerticalAlignment="Bottom"
-                               Opacity="0.7" FontSize="10" Margin="5 0 0 5"
-                               Foreground="{DynamicResource Foreground}">
-                        v 1.0.0
-                    </TextBlock>
+                               Opacity="0.7" FontSize="10" Margin="6 0 0 4"
+                               Foreground="{DynamicResource MutedForeground}"
+                               Text="v 1.0.0"/>
 
-                    <Button Margin="10 0 0 0" Padding="8 2"
-                            VerticalAlignment="Center" FontSize="10.5" FontWeight="SemiBold"
-                            Background="{DynamicResource Primary}"
-                            Foreground="{DynamicResource PrimaryForeground}"
-                            BorderThickness="0" Cursor="Hand"
-                            Content="{DynamicResource mw_update_badge}"
+                    <Border CornerRadius="11" Padding="10 4" Margin="12 0 0 0"
+                            VerticalAlignment="Center" Background="{DynamicResource Muted}">
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding AlreadyPatched}" Value="True">
+                                        <Setter Property="Background" Value="{DynamicResource SuccessSoft}"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IsBusy}" Value="True">
+                                        <Setter Property="Background" Value="{DynamicResource WarnSoft}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                        <StackPanel Orientation="Horizontal">
+                            <Ellipse x:Name="StatusDot" Width="7" Height="7"
+                                     VerticalAlignment="Center" Fill="{DynamicResource SuccessDot}">
+                                <Ellipse.Style>
+                                    <Style TargetType="Ellipse">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsBusy}" Value="True">
+                                                <Setter Property="Fill" Value="{DynamicResource WarnDot}"/>
+                                                <DataTrigger.EnterActions>
+                                                    <BeginStoryboard x:Name="WorkingPulse">
+                                                        <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                                                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                                             From="1" To="0.3" Duration="0:0:0.6"/>
+                                                        </Storyboard>
+                                                    </BeginStoryboard>
+                                                </DataTrigger.EnterActions>
+                                                <DataTrigger.ExitActions>
+                                                    <StopStoryboard BeginStoryboardName="WorkingPulse"/>
+                                                </DataTrigger.ExitActions>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Ellipse.Style>
+                            </Ellipse>
+                            <TextBlock x:Name="StatusText" Margin="7 0 0 0"
+                                       FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center"
+                                       Foreground="{DynamicResource MutedForeground}"
+                                       Text="{DynamicResource mw_status_ready}">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding AlreadyPatched}" Value="True">
+                                                <Setter Property="Text" Value="{DynamicResource mw_status_patched}"/>
+                                                <Setter Property="Foreground" Value="{DynamicResource SuccessDot}"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding IsBusy}" Value="True">
+                                                <Setter Property="Text" Value="{DynamicResource mw_status_working}"/>
+                                                <Setter Property="Foreground" Value="{DynamicResource WarnDot}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </StackPanel>
+                    </Border>
+
+                    <Button Margin="8 0 0 0" Padding="10 4"
+                            VerticalAlignment="Center" FontSize="11" FontWeight="SemiBold"
+                            Background="{DynamicResource AccentSoft}"
+                            Foreground="{DynamicResource AccentBright}"
+                            BorderBrush="{DynamicResource AccentVivid}"
+                            BorderThickness="1" Cursor="Hand"
                             Command="{Binding ShowUpdateCommand}"
                             ToolTip="{DynamicResource up_popup_title}">
+                        <Button.Content>
+                            <StackPanel Orientation="Horizontal">
+                                <Ellipse Width="6" Height="6" Fill="{DynamicResource AccentBright}"
+                                         VerticalAlignment="Center"/>
+                                <TextBlock Margin="7 0 0 0" VerticalAlignment="Center"
+                                           Text="{DynamicResource mw_update_badge}"/>
+                            </StackPanel>
+                        </Button.Content>
                         <Button.Style>
                             <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
                                 <!-- Collapsed by default so offline builds never show the badge. -->
@@ -65,36 +138,37 @@
                             </Style>
                         </Button.Style>
                         <Button.Resources>
-                            <CornerRadius x:Key="CornerRadius">4 4 4 4</CornerRadius>
+                            <CornerRadius x:Key="CornerRadius">11 11 11 11</CornerRadius>
                         </Button.Resources>
                     </Button>
 
                 </StackPanel>
-                                
-                <StackPanel  HorizontalAlignment="Right" Orientation="Horizontal">
+
+                <StackPanel  HorizontalAlignment="Right" Orientation="Horizontal" Margin="0 6 0 0">
                     <Button
-                        Margin="0 0 5 0"
-                        Width="25" Height="25" Padding="5.5"
+                        Margin="0 0 6 0"
+                        Width="28" Height="28" Padding="6"
                         Style="{StaticResource IconButton}"
                         Tag="{StaticResource CogIcon}"
                         Command="{Binding OpenSettingsCommand}"
                         />
                     <Button
-                        Margin="9 0 15 0"
+                        Margin="0 0 14 0"
                         Tag="{StaticResource CloseIcon}"
-                        Width="25" Height="25" Padding="6.5"
+                        Width="28" Height="28" Padding="7"
                         HorizontalAlignment="Right"
                         Click="OnClosing"
                         VerticalAlignment="Center">
                         <Button.Resources>
-                            <CornerRadius x:Key="CornerRadius">5 5 5 5</CornerRadius>
+                            <CornerRadius x:Key="CornerRadius">8 8 8 8</CornerRadius>
                         </Button.Resources>
                         <Button.Style>
                             <Style BasedOn="{StaticResource IconButton}" TargetType="Button">
                                 <Style.Triggers>
                                     <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="{DynamicResource Secondary}"/>
-                                        <Setter Property="Foreground" Value="{DynamicResource Destructive}"/>
+                                        <Setter Property="Background" Value="{DynamicResource ErrorSoft}"/>
+                                        <Setter Property="BorderBrush" Value="Transparent"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource ErrorDot}"/>
                                     </Trigger>
                                 </Style.Triggers>
                             </Style>
@@ -103,16 +177,16 @@
                 </StackPanel>
 
                 <Border Background="{DynamicResource Border}" Height="1" VerticalAlignment="Bottom"></Border>
-                                
+
             </Grid>
-            <Grid Margin="0 55 0 0">
+            <Grid Margin="0 62 0 0">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition/>
-                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="56"/>
                 </Grid.RowDefinitions>
-                
-                <Grid Margin="10" Cursor="Hand" Background="Transparent">
+
+                <Grid Margin="14 10 14 10" Cursor="Hand" Background="Transparent">
                     <TextBox Style="{StaticResource TitledTextBox}"
                              IsReadOnly="True"
                              Text="{Binding WeModInfo.RootDirectory, Mode=OneWay}"
@@ -123,45 +197,94 @@
                     </Grid.InputBindings>
                 </Grid>
 
-                    
+
                     <Border Grid.Row="1" BorderBrush="{DynamicResource Border}" BorderThickness="1"
-                            Margin="10 0 10 10"
-                            CornerRadius="5">
+                            Margin="14 0 14 10" Padding="0 8 0 8"
+                            Background="{DynamicResource Muted}"
+                            CornerRadius="10">
                         <Grid>
-                            <ListBox ItemsSource="{Binding LogList}" SelectionMode="Single"
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <Grid Margin="12 0 8 6">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <Ellipse Width="7" Height="7" Fill="{DynamicResource AccentVivid}"
+                                             VerticalAlignment="Center"/>
+                                    <TextBlock Margin="8 0 0 0" FontSize="10.5" FontWeight="Bold"
+                                               Foreground="{DynamicResource MutedForeground}"
+                                               VerticalAlignment="Center"
+                                               Text="{DynamicResource mw_activity}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                    <Button Width="24" Height="24" Padding="5"
+                                            Style="{StaticResource IconButton}"
+                                            Tag="{StaticResource CopyIcon}"
+                                            ToolTip="{DynamicResource mw_copy_logs}"
+                                            Command="{Binding CopyLogsCommand}"/>
+                                    <Button Width="24" Height="24" Padding="5" Margin="5 0 0 0"
+                                            Style="{StaticResource IconButton}"
+                                            Tag="{StaticResource ExportIcon}"
+                                            ToolTip="{DynamicResource mw_export_logs}"
+                                            Command="{Binding ExportLogsCommand}"/>
+                                </StackPanel>
+                            </Grid>
+                            <ListBox Grid.Row="1" ItemsSource="{Binding LogList}" SelectionMode="Single"
                                  BorderBrush="Transparent" BorderThickness="0"
-                                 Background="Transparent" 
+                                 Background="Transparent"
                                  x:Name="LogList"
-                                 Padding="6"
+                                 Padding="8 0"
+                                 HorizontalContentAlignment="Stretch"
                                  ScrollViewer.VerticalScrollBarVisibility="Hidden"
                                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                                  ScrollViewer.CanContentScroll="False">
                             <ListBox.ItemContainerStyle>
                                                     <Style TargetType="ListBoxItem">
                         <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
-                        <Setter Property="Margin" Value="0 0 0 5"/>
+                        <Setter Property="Margin" Value="0 0 0 3"/>
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
                         <Setter Property="Template">
                             <Setter.Value>
                                 <ControlTemplate TargetType="ListBoxItem">
-                                    <Border x:Name="Card" HorizontalAlignment="Left"
-                                            Background="#08fc81"
-                                            BorderBrush="{DynamicResource Border}"
-                                            Padding="5 3 5 3" CornerRadius="3">
-                                        <TextBox Text="{Binding Message}" 
-                                                 Cursor="IBeam" FontSize="13"
-                                                 Background="Transparent" TextWrapping="Wrap"
-                                                 BorderThickness="0"
-                                                 IsReadOnly="True"/>
+                                    <Border x:Name="Row" CornerRadius="6" Padding="10 6"
+                                            Background="Transparent"
+                                            BorderBrush="Transparent" BorderThickness="1">
+                                        <DockPanel LastChildFill="True">
+                                            <Ellipse x:Name="LevelDot" DockPanel.Dock="Left"
+                                                     Width="7" Height="7" Margin="0 0 9 0"
+                                                     VerticalAlignment="Center"
+                                                     Fill="{DynamicResource InfoDot}"/>
+                                            <TextBox Text="{Binding Message}"
+                                                     Cursor="IBeam" FontSize="12.5"
+                                                     Foreground="{DynamicResource Foreground}"
+                                                     Background="Transparent" TextWrapping="Wrap"
+                                                     BorderThickness="0"
+                                                     IsReadOnly="True"/>
+                                        </DockPanel>
                                     </Border>
                                     <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="Row" Property="Background" Value="#10FFFFFF"/>
+                                        </Trigger>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter TargetName="Row" Property="Background" Value="{DynamicResource AccentFaint}"/>
+                                            <Setter TargetName="Row" Property="BorderBrush" Value="{DynamicResource AccentSoft}"/>
+                                        </Trigger>
                                         <DataTrigger Binding="{Binding LogType}" Value="Error">
-                                            <Setter  TargetName="Card" Property="Background" Value="#f04343"></Setter>
+                                            <Setter TargetName="LevelDot" Property="Fill" Value="{DynamicResource ErrorDot}"/>
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding LogType}" Value="Info">
-                                            <Setter  TargetName="Card" Property="Background" Value="#FFF"></Setter>
+                                            <Setter TargetName="LevelDot" Property="Fill" Value="{DynamicResource InfoDot}"/>
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding LogType}" Value="Warn">
-                                            <Setter  TargetName="Card" Property="Background" Value="#facc15"></Setter>
+                                            <Setter TargetName="LevelDot" Property="Fill" Value="{DynamicResource WarnDot}"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding LogType}" Value="Success">
+                                            <Setter TargetName="LevelDot" Property="Fill" Value="{DynamicResource SuccessDot}"/>
                                         </DataTrigger>
                                     </ControlTemplate.Triggers>
 
@@ -171,24 +294,11 @@
                     </Style>
                             </ListBox.ItemContainerStyle>
                         </ListBox>
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top"
-                                        Margin="0 4 4 0">
-                                <Button Width="22" Height="22" Padding="4"
-                                        Style="{StaticResource IconButton}"
-                                        Tag="{StaticResource CopyIcon}"
-                                        ToolTip="{DynamicResource mw_copy_logs}"
-                                        Command="{Binding CopyLogsCommand}"/>
-                                <Button Width="22" Height="22" Padding="4" Margin="4 0 0 0"
-                                        Style="{StaticResource IconButton}"
-                                        Tag="{StaticResource ExportIcon}"
-                                        ToolTip="{DynamicResource mw_export_logs}"
-                                        Command="{Binding ExportLogsCommand}"/>
-                            </StackPanel>
                         </Grid>
                     </Border>
-                
 
-                <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Grid.Row="2" Margin="10 0 10 10">
+
+                <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Grid.Row="2" Margin="14 0 14 12">
                     <Grid>
                         <Grid HorizontalAlignment="Right" >
                             <Grid.Style>
@@ -200,15 +310,25 @@
                                     </Style.Triggers>
                                 </Style>
                             </Grid.Style>
-                            <Button Style="{StaticResource ColoredButton}"
+                            <Button
                                     IsEnabled="{Binding IsPatchEnabled}"
-                                    FontWeight="Bold" FontSize="16" Width="200" 
+                                    FontWeight="Bold" FontSize="15" Width="200" Height="38"
                                     Command="{Binding ApplyPatchCommand}"
-                                    Content="{DynamicResource mw_patch}"/>
+                                    Content="{DynamicResource mw_patch}">
+                                <Button.Style>
+                                    <Style TargetType="Button" BasedOn="{StaticResource ColoredButton}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsBusy}" Value="True">
+                                                <Setter Property="Content" Value="{DynamicResource mw_status_working}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
                         </Grid>
                         <Button HorizontalAlignment="Right"
                                 Command="{Binding RestoreBackupCommand}"
-                                FontWeight="Bold" FontSize="16" Width="200"
+                                FontWeight="Bold" FontSize="15" Width="200" Height="38"
                                 Style="{StaticResource ColoredButton}"
                                 IsEnabled="{Binding IsIdle}"
                                 Visibility="{Binding CanRestore, Converter={StaticResource ToVisibilityConverter}}"
@@ -217,24 +337,23 @@
                 </StackPanel>
 
 
-                
-                <DockPanel Grid.Row="2" Margin="10 0 10 10">
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" 
-                                Cursor="Hand" 
+
+                <DockPanel Grid.Row="2" Margin="16 0 14 12">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center"
+                                Cursor="Hand"
                                 HorizontalAlignment="Left"
-                                MouseDown="OpenSourceClicked" 
-                                Background="Transparent">
-                        <Viewbox VerticalAlignment="Center" Width="32" Height="32">
-                            <Path 
-                                Fill="White" Data="{StaticResource GitHub}"/>
+                                MouseDown="OpenSourceClicked"
+                                Background="Transparent" Opacity="0.85">
+                        <Viewbox VerticalAlignment="Center" Width="24" Height="24">
+                            <Path
+                                Fill="{DynamicResource MutedForeground}" Data="{StaticResource GitHub}"/>
                         </Viewbox>
                         <Grid>
-                            <TextBlock Margin="8 0 0 0"  FontSize="10" Foreground="{DynamicResource AccentForeground}">
-                                <Hyperlink Foreground="{DynamicResource AccentForeground}"><Run Text="{DynamicResource mw_source_code}"/></Hyperlink>
+                            <TextBlock Margin="9 0 0 0"  FontSize="10.5" Foreground="{DynamicResource AccentForeground}">
+                                <Hyperlink Foreground="{DynamicResource MutedForeground}"><Run Text="{DynamicResource mw_source_code}"/></Hyperlink>
                                 <LineBreak/>
-                                <Run Text="{DynamicResource mw_made_by}"/>
-                                
-                                
+                                <Run Text="{DynamicResource mw_made_by}" Foreground="{DynamicResource MutedForeground}"/>
+
                                 <LineBreak/>
                                 <Run Foreground="{DynamicResource MutedForeground}" Text="{DynamicResource mw_star_hint}"/>
                             </TextBlock>
@@ -242,7 +361,7 @@
                     </StackPanel>
                 </DockPanel>
             </Grid>
-            
+
             <controls:PopupHost x:Name="PopupHost"/>
         </Grid>
     </Border>

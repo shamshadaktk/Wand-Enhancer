@@ -4,101 +4,82 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              mc:Ignorable="d"
-             d:DesignHeight="Auto" d:DesignWidth="Auto"
-             Background="{DynamicResource Background}"
-             Foreground="{DynamicResource MutedForeground}"
-             FontWeight="Medium"
-             FontSize="13">
-    <Grid MinWidth="500" MaxWidth="620">
-        <Grid.Resources>
-            <Style x:Key="UpdateActionButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-                <Setter Property="Background" Value="{DynamicResource Primary}" />
-                <Setter Property="BorderBrush" Value="{DynamicResource Primary}" />
-                <Setter Property="Foreground" Value="{DynamicResource PrimaryForeground}" />
-                <Style.Triggers>
-                    <Trigger Property="IsMouseOver" Value="True">
-                        <Setter Property="Background" Value="{DynamicResource Primary}" />
-                        <Setter Property="BorderBrush" Value="{DynamicResource Primary}" />
-                    </Trigger>
-                </Style.Triggers>
-            </Style>
-        </Grid.Resources>
-
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
-
-        <Border Grid.Row="0" HorizontalAlignment="Left" MaxWidth="560"
-                Padding="9 4" CornerRadius="4"
-                Background="{DynamicResource Muted}">
-            <DockPanel LastChildFill="True">
-                <Ellipse Width="7" Height="7" Fill="{DynamicResource Destructive}"
-                         Margin="0 0 8 0" VerticalAlignment="Center" />
-                <TextBlock Foreground="{DynamicResource Foreground}" FontSize="11.5"
-                           Text="{DynamicResource up_warning}" TextWrapping="Wrap" />
-            </DockPanel>
+             MinWidth="470" MaxWidth="470">
+    <StackPanel>
+        <Border Background="{DynamicResource WarnSoft}" CornerRadius="8" Padding="12 9" Margin="0 0 0 12">
+            <StackPanel Orientation="Horizontal">
+                <Ellipse Width="8" Height="8" Fill="{DynamicResource WarnDot}"
+                         VerticalAlignment="Center"/>
+                <TextBlock Margin="9 0 0 0" FontSize="12.5" FontWeight="Medium"
+                           Foreground="{DynamicResource WarnDot}"
+                           VerticalAlignment="Center" TextWrapping="Wrap"
+                           Text="{DynamicResource up_warning}"/>
+            </StackPanel>
         </Border>
 
-        <WrapPanel Grid.Row="1" Margin="0 10 0 0" Orientation="Horizontal">
-            <Border Padding="8 4" Margin="0 0 8 0" CornerRadius="4"
-                    Background="{DynamicResource Muted}" BorderBrush="{DynamicResource Border}" BorderThickness="1">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Margin="0 0 7 0" VerticalAlignment="Center"
-                               Foreground="{DynamicResource MutedForeground}" FontSize="10.5"
-                               Text="{DynamicResource up_current_version}" />
-                    <TextBlock x:Name="CurrentVersionValue" VerticalAlignment="Center"
-                               Foreground="{DynamicResource Foreground}" FontSize="12.5" FontWeight="Bold" />
+        <Grid Margin="0 0 0 12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Border Background="{DynamicResource Muted}" CornerRadius="8" Padding="10 8">
+                <StackPanel>
+                    <TextBlock FontSize="10.5" FontWeight="Bold"
+                               Foreground="{DynamicResource MutedForeground}"
+                               Text="{DynamicResource up_current_version}"/>
+                    <TextBlock x:Name="CurrentVersionValue" FontSize="15" FontWeight="SemiBold"
+                               Margin="0 2 0 0" Foreground="{DynamicResource Foreground}"
+                               Text="?.?.?"/>
                 </StackPanel>
             </Border>
-
-            <Border Padding="8 4" CornerRadius="4"
-                    Background="{DynamicResource Primary}" BorderThickness="1">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Margin="0 0 7 0" VerticalAlignment="Center"
-                               Foreground="{DynamicResource PrimaryForeground}" FontSize="10.5"
-                               Text="{DynamicResource up_latest_version}" />
-                    <TextBlock x:Name="LatestVersionValue" VerticalAlignment="Center"
-                               Foreground="{DynamicResource PrimaryForeground}" FontSize="12.5" FontWeight="Bold" />
+            <Path Grid.Column="1" Width="10" Height="14" Margin="10 0"
+                  Stretch="Fill" VerticalAlignment="Center"
+                  Data="{StaticResource ChevronRight}" Fill="{DynamicResource AccentBright}"/>
+            <Border Grid.Column="2" CornerRadius="8" Padding="10 8"
+                    Background="{DynamicResource AccentGradient}">
+                <StackPanel>
+                    <TextBlock FontSize="10.5" FontWeight="Bold"
+                               Foreground="{DynamicResource AccentInk}" Opacity="0.75"
+                               Text="{DynamicResource up_latest_version}"/>
+                    <TextBlock x:Name="LatestVersionValue" FontSize="15" FontWeight="Bold"
+                               Margin="0 2 0 0" Foreground="{DynamicResource AccentInk}"
+                               Text="?.?.?"/>
                 </StackPanel>
             </Border>
-        </WrapPanel>
+        </Grid>
 
-        <TextBlock Grid.Row="2" Margin="0 12 0 6" Foreground="{DynamicResource Foreground}"
-                   FontSize="14" FontWeight="Bold" Text="{DynamicResource up_release_notes}" />
+        <TextBlock Margin="0 0 0 6" FontSize="13" FontWeight="Bold"
+                   Foreground="{DynamicResource Foreground}"
+                   Text="{DynamicResource up_release_notes}"/>
 
-        <Border Grid.Row="3" MinHeight="180"
-                Background="{DynamicResource Muted}" BorderBrush="{DynamicResource Border}" BorderThickness="1" CornerRadius="4">
+        <Border Background="{DynamicResource Muted}" CornerRadius="8" Padding="12"
+                BorderBrush="{DynamicResource Border}" BorderThickness="1"
+                MinHeight="160" MaxHeight="240">
             <ScrollViewer x:Name="NotesScrollViewer"
                           VerticalScrollBarVisibility="Hidden"
-                          HorizontalScrollBarVisibility="Disabled"
-                          CanContentScroll="False">
-                <TextBox x:Name="NotesTextBlock" Background="Transparent"
-                         BorderBrush="Transparent"
-                         Padding="12"
-                         BorderThickness="0" IsReadOnly="True"
+                          HorizontalScrollBarVisibility="Disabled">
+                <TextBox x:Name="NotesTextBlock"
+                         IsReadOnly="True" TextWrapping="Wrap" FontSize="12.5"
                          Foreground="{DynamicResource Foreground}"
-                         TextWrapping="Wrap" />
+                         Background="Transparent" BorderThickness="0"
+                         Cursor="IBeam"
+                         Text="Release notes"/>
             </ScrollViewer>
         </Border>
 
-        <Grid Grid.Row="4" Margin="0 12 0 0">
+        <Grid Margin="0 14 0 0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-
-            <Button x:Name="ShowMoreButton" Grid.Column="1" Margin="0 0 10 0"
-                    Padding="12 5" Content="{DynamicResource up_show_more}"
-                    Click="OnShowMoreClick" />
-
-            <Button Grid.Column="2" Padding="18 5" Style="{StaticResource UpdateActionButton}"
+            <Button x:Name="ShowMoreButton" Padding="14 0" Height="34" FontSize="13"
+                    Content="{DynamicResource up_show_more}"
+                    Click="OnShowMoreClick"/>
+            <Button Grid.Column="1" Margin="8 0 0 0" Padding="14 0" Height="34" FontSize="13"
+                    Style="{StaticResource ColoredButton}"
                     Content="{DynamicResource up_open_release}"
-                    Click="OnOpenReleaseClick" />
+                    Click="OnOpenReleaseClick"/>
         </Grid>
-    </Grid>
+    </StackPanel>
 </UserControl>

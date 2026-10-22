@@ -4,62 +4,66 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              mc:Ignorable="d"
-             d:DesignHeight="Auto" d:DesignWidth="Auto"
-             Background="{DynamicResource Background}"
-             Foreground="{DynamicResource MutedForeground}"
-             FontWeight="Medium"
-             FontSize="13">
-    <Grid MinWidth="250">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
-        
-        <Grid Grid.Row="0" Margin="0 0 0 15">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-            
-            <TextBlock Grid.Column="0" VerticalAlignment="Center" 
-                       Text="{DynamicResource settings_language}" />
-            <ComboBox Grid.Column="1" x:Name="LanguageComboBox" 
-                      Width="130"
-                      SelectionChanged="OnLanguageSelectionChanged">
-                <ComboBox.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding DisplayName}" />
-                    </DataTemplate>
-                </ComboBox.ItemTemplate>
-            </ComboBox>
-        </Grid>
-        
-        <StackPanel Grid.Row="1" Margin="0 0 0 15" x:Name="UpdateCheckRows">
-            <Grid Margin="0 0 0 10">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-
-                <TextBlock Grid.Column="0" VerticalAlignment="Center"
-                           Text="{DynamicResource settings_check_updates}" />
-                <CheckBox Grid.Column="1" x:Name="UpdateCheckCheckBox" VerticalAlignment="Center" />
-            </Grid>
+             MinWidth="430" MaxWidth="430">
+    <StackPanel>
+        <Border Background="{DynamicResource Muted}" CornerRadius="8" Padding="12 10" Margin="0 0 0 6">
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-
-                <TextBlock Grid.Column="0" VerticalAlignment="Center"
-                           Text="{DynamicResource settings_check_prereleases}" />
-                <CheckBox Grid.Column="1" x:Name="CheckPrereleasesCheckBox" VerticalAlignment="Center" />
+                <TextBlock VerticalAlignment="Center" Margin="0 0 12 0"
+                           FontSize="13" FontWeight="Medium"
+                           Foreground="{DynamicResource MutedForeground}"
+                           Text="{DynamicResource settings_language}"/>
+                <ComboBox x:Name="LanguageComboBox" Grid.Column="1"
+                          VerticalAlignment="Center"
+                          SelectionChanged="OnLanguageSelectionChanged">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
             </Grid>
+        </Border>
+
+        <StackPanel x:Name="UpdateCheckRows">
+            <Border Background="{DynamicResource Muted}" CornerRadius="8" Padding="12 7" Margin="0 0 0 5">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock VerticalAlignment="Center" FontSize="13.5"
+                               Foreground="{DynamicResource Foreground}"
+                               Text="{DynamicResource settings_check_updates}"/>
+                    <CheckBox x:Name="UpdateCheckCheckBox" Grid.Column="1"
+                              VerticalAlignment="Center"
+                              Style="{StaticResource AccentToggle}"/>
+                </Grid>
+            </Border>
+            <Border Background="{DynamicResource Muted}" CornerRadius="8" Padding="12 7">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock VerticalAlignment="Center" FontSize="13.5"
+                               Foreground="{DynamicResource Foreground}"
+                               Text="{DynamicResource settings_check_prereleases}"/>
+                    <CheckBox x:Name="CheckPrereleasesCheckBox" Grid.Column="1"
+                              VerticalAlignment="Center"
+                              Style="{StaticResource AccentToggle}"/>
+                </Grid>
+            </Border>
         </StackPanel>
 
-        <Button Grid.Row="2" Padding="0 5 0 5" Margin="0 5 0 0"
+        <Button Margin="0 14 0 0" Height="36" FontSize="14"
+                Style="{StaticResource ColoredButton}"
                 Content="{DynamicResource settings_save}"
-                Click="OnSaveClick" />
-    </Grid>
+                Click="OnSaveClick"/>
+    </StackPanel>
 </UserControl>

@@ -3,128 +3,183 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:local="clr-namespace:WandEnhancer.View.Popups"
-             xmlns:controls="clr-namespace:WandEnhancer.View.Controls"
              mc:Ignorable="d"
-             d:DesignHeight="Auto" d:DesignWidth="Auto"
-             Background="{DynamicResource Background}"
-             Foreground="{DynamicResource MutedForeground}"
-             FontWeight="Medium"
-             FontSize="13">
-    <StackPanel MinWidth="430">
-        <Grid Margin="0 0 5 8">
+             MinWidth="430" MaxWidth="430">
+    <StackPanel>
+        <Grid Margin="0 0 0 8">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <TextBlock Grid.Column="0" VerticalAlignment="Center"
-                       Foreground="{DynamicResource Foreground}"
-                       Text="{DynamicResource pv_patch_method}" />
-            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
-                <ComboBox x:Name="StrategyComboBox" Width="190">
-                    <ComboBox.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding DisplayName}" />
-                        </DataTemplate>
-                    </ComboBox.ItemTemplate>
-                </ComboBox>
-                <TextBlock Text="&#x24D8;" FontSize="15" Margin="8 0 0 0" VerticalAlignment="Center"
-                           Cursor="Help" Foreground="{DynamicResource MutedForeground}">
-                    <TextBlock.ToolTip>
-                        <ToolTip>
-                            <TextBlock MaxWidth="320" TextWrapping="Wrap" Text="{DynamicResource pv_strategy_hint}" />
-                        </ToolTip>
-                    </TextBlock.ToolTip>
-                </TextBlock>
-            </StackPanel>
+            <TextBlock Grid.Column="0" VerticalAlignment="Center" Margin="0 0 12 0"
+                       FontSize="13" FontWeight="Medium"
+                       Foreground="{DynamicResource MutedForeground}"
+                       Text="{DynamicResource pv_patch_method}"/>
+            <ComboBox x:Name="StrategyComboBox" Grid.Column="1"
+                      VerticalAlignment="Center">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            <TextBlock Grid.Column="2" Text="&#x24D8;" FontSize="15" Margin="10 0 0 0"
+                       VerticalAlignment="Center" Cursor="Help"
+                       Foreground="{DynamicResource MutedForeground}">
+                <TextBlock.ToolTip>
+                    <ToolTip>
+                        <TextBlock MaxWidth="320" TextWrapping="Wrap" Text="{DynamicResource pv_strategy_hint}"/>
+                    </ToolTip>
+                </TextBlock.ToolTip>
+            </TextBlock>
         </Grid>
 
-        <Grid Visibility="Visible" Margin="0 0 5 0">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="27" />
-                <RowDefinition Height="27" />
-                <RowDefinition Height="27" />
-                <RowDefinition Height="27" />
-                <RowDefinition Height="27" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-
-            <TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Text="{DynamicResource pv_activate_pro}" />
-            <CheckBox Grid.Row="0" Grid.Column="1" x:Name="ActivateProBox" HorizontalAlignment="Right" VerticalAlignment="Center"
-                      IsChecked="True" />
-
-            <TextBlock Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" Text="{DynamicResource pv_devtools}" />
-            <CheckBox Grid.Row="1" Grid.Column="1" x:Name="DevToolsHotkeyBox" HorizontalAlignment="Right" VerticalAlignment="Center" />
-
-            <TextBlock Grid.Row="2" Grid.Column="0" VerticalAlignment="Center" Text="{DynamicResource pv_disable_updates}" />
-            <CheckBox Grid.Row="2" Grid.Column="1" x:Name="DisableUpdateBox" HorizontalAlignment="Right" VerticalAlignment="Center" />
-
-            <TextBlock Grid.Row="3" Grid.Column="0" VerticalAlignment="Center" Text="{DynamicResource pv_remote_web_panel_preview}" />
-            <CheckBox Grid.Row="3" Grid.Column="1" x:Name="RemoteWebPanelPreviewBox" HorizontalAlignment="Right" VerticalAlignment="Center" />
-
-            <TextBlock Grid.Row="4" Grid.Column="0" VerticalAlignment="Center" Text="{DynamicResource pv_auto_apply}" />
-            <CheckBox Grid.Row="4" Grid.Column="1" x:Name="AutoApplyBox" HorizontalAlignment="Right" VerticalAlignment="Center" />
-
-            <Border Grid.Row="5" Grid.ColumnSpan="2" Margin="0 14 0 0" Padding="10"
-                    BorderBrush="{DynamicResource Border}" BorderThickness="1" CornerRadius="4"
-                    Background="{DynamicResource Muted}">
-                <StackPanel>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" VerticalAlignment="Center"
-                                   Foreground="{DynamicResource Foreground}"
-                                   Text="{DynamicResource pv_custom_scripts}" />
-                        <Button Grid.Column="1" Padding="10 4" Content="{DynamicResource pv_add_js_scripts}"
-                                Click="OnAddScriptClick" />
-                    </Grid>
-
-                    <TextBlock Margin="0 7 0 0" FontSize="11" TextWrapping="Wrap"
-                               Opacity="0.8"
-                               Text="{DynamicResource pv_custom_scripts_hint}" />
-
-                    <ItemsControl x:Name="ScriptList" Margin="0 2 0 0">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <WrapPanel />
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Border Margin="0 6 6 0" Padding="8 3"
-                                        Background="{DynamicResource Card}"
-                                        BorderBrush="{DynamicResource Border}"
-                                        BorderThickness="1"
-                                        CornerRadius="3">
-                                    <DockPanel LastChildFill="True">
-                                        <Button DockPanel.Dock="Right" Tag="{Binding}" Content="x"
-                                                BorderThickness="0" Padding="6 0" Margin="6 0 0 0"
-                                                Click="OnRemoveScriptClick" />
-                                        <TextBlock VerticalAlignment="Center"
-                                                   Foreground="{DynamicResource Foreground}"
-                                                   Text="{Binding FileName}" />
-                                    </DockPanel>
-                                </Border>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-
-                    <TextBlock x:Name="NoScriptsText" Margin="0 7 0 0" FontSize="11"
-                               Opacity="0.7"
-                               Text="{DynamicResource pv_no_custom_scripts}" />
-                </StackPanel>
+        <StackPanel>
+            <Border Background="{DynamicResource Muted}" CornerRadius="8" Padding="12 7" Margin="0 0 0 5">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock VerticalAlignment="Center" FontSize="13.5"
+                               Foreground="{DynamicResource Foreground}"
+                               Text="{DynamicResource pv_activate_pro}"/>
+                    <CheckBox x:Name="ActivateProBox" Grid.Column="1"
+                              VerticalAlignment="Center" IsChecked="True"
+                              Style="{StaticResource AccentToggle}"/>
+                </Grid>
             </Border>
+            <Border Background="{DynamicResource Muted}" CornerRadius="8" Padding="12 7" Margin="0 0 0 5">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock VerticalAlignment="Center" FontSize="13.5"
+                               Foreground="{DynamicResource Foreground}"
+                               Text="{DynamicResource pv_devtools}"/>
+                    <CheckBox x:Name="DevToolsHotkeyBox" Grid.Column="1"
+                              VerticalAlignment="Center"
+                              Style="{StaticResource AccentToggle}"/>
+                </Grid>
+            </Border>
+            <Border Background="{DynamicResource Muted}" CornerRadius="8" Padding="12 7" Margin="0 0 0 5">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock VerticalAlignment="Center" FontSize="13.5"
+                               Foreground="{DynamicResource Foreground}"
+                               Text="{DynamicResource pv_disable_updates}"/>
+                    <CheckBox x:Name="DisableUpdateBox" Grid.Column="1"
+                              VerticalAlignment="Center"
+                              Style="{StaticResource AccentToggle}"/>
+                </Grid>
+            </Border>
+            <Border Background="{DynamicResource Muted}" CornerRadius="8" Padding="12 7" Margin="0 0 0 5">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock VerticalAlignment="Center" FontSize="13.5"
+                               Foreground="{DynamicResource Foreground}"
+                               Text="{DynamicResource pv_remote_web_panel_preview}"/>
+                    <CheckBox x:Name="RemoteWebPanelPreviewBox" Grid.Column="1"
+                              VerticalAlignment="Center"
+                              Style="{StaticResource AccentToggle}"/>
+                </Grid>
+            </Border>
+            <Border Background="{DynamicResource Muted}" CornerRadius="8" Padding="12 7">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock VerticalAlignment="Center" FontSize="13.5"
+                               Foreground="{DynamicResource Foreground}"
+                               Text="{DynamicResource pv_auto_apply}"/>
+                    <CheckBox x:Name="AutoApplyBox" Grid.Column="1"
+                              VerticalAlignment="Center"
+                              Style="{StaticResource AccentToggle}"/>
+                </Grid>
+            </Border>
+        </StackPanel>
 
-            <Button Grid.Row="6" Grid.ColumnSpan="2" Padding="0 5 0 5" Margin="0 15 0 0" Content="{DynamicResource pv_start}"
-                    Click="OnPatchButtonClick" />
-        </Grid>
+        <Border Margin="0 8 0 0" CornerRadius="8" Padding="12 10"
+                BorderBrush="{DynamicResource Border}" BorderThickness="1"
+                Background="{DynamicResource Card}">
+            <StackPanel>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center"
+                               Foreground="{DynamicResource Foreground}"
+                               Text="{DynamicResource pv_custom_scripts}"/>
+                    <Button Grid.Column="1" Padding="12 5" FontSize="12" FontWeight="SemiBold"
+                            Content="{DynamicResource pv_add_js_scripts}"
+                            Click="OnAddScriptClick"/>
+                </Grid>
+                <TextBlock Margin="0 7 0 0" FontSize="11.5" TextWrapping="Wrap"
+                           Opacity="0.8" Foreground="{DynamicResource MutedForeground}"
+                           Text="{DynamicResource pv_custom_scripts_hint}"/>
+                <ItemsControl x:Name="ScriptList" Margin="0 8 0 0">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel Orientation="Horizontal"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Background="{DynamicResource AccentSoft}"
+                                    BorderBrush="{DynamicResource AccentVivid}"
+                                    BorderThickness="1"
+                                    CornerRadius="12" Padding="10 4" Margin="0 0 6 6">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <Ellipse Width="6" Height="6" Fill="{DynamicResource AccentBright}"
+                                             VerticalAlignment="Center" Margin="0 0 7 0"/>
+                                    <TextBlock Foreground="{DynamicResource Foreground}"
+                                               FontSize="12" VerticalAlignment="Center"
+                                               Text="{Binding FileName}"/>
+                                    <Button Margin="7 0 0 0" Width="18" Height="18"
+                                            Tag="{Binding}"
+                                            Click="OnRemoveScriptClick">
+                                        <Button.Style>
+                                            <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                                                <Setter Property="Background" Value="Transparent"/>
+                                                <Setter Property="BorderThickness" Value="0"/>
+                                            </Style>
+                                        </Button.Style>
+                                        <Button.Resources>
+                                            <CornerRadius x:Key="CornerRadius">9 9 9 9</CornerRadius>
+                                        </Button.Resources>
+                                        <Button.Content>
+                                            <Path Stretch="Uniform" Width="8" Height="8"
+                                                  Data="{StaticResource CloseIcon}"
+                                                  Fill="{DynamicResource MutedForeground}"/>
+                                        </Button.Content>
+                                    </Button>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <TextBlock x:Name="NoScriptsText"
+                           Margin="0 7 0 0" FontSize="11.5"
+                           Opacity="0.7" Foreground="{DynamicResource MutedForeground}"
+                           Text="{DynamicResource pv_no_custom_scripts}"/>
+            </StackPanel>
+        </Border>
+
+        <Button Margin="0 12 0 0" Height="38" FontSize="15"
+                Style="{StaticResource ColoredButton}"
+                Content="{DynamicResource pv_start}"
+                Click="OnPatchButtonClick"/>
     </StackPanel>
-
 </UserControl>

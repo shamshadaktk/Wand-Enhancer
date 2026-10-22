@@ -17,6 +17,40 @@
     <Brush x:Key="Destructive">Red</Brush>
     <Brush x:Key="DestructiveForeground">#FAFAFA</Brush>
     <Brush x:Key="Border">#27272A</Brush>
+    <Brush x:Key="BorderStrong">#3F3F46</Brush>
     <Brush x:Key="Input">#27272A</Brush>
     <Brush x:Key="Ring">#D4D4D8</Brush>
+
+    <!-- Signature emerald accent. -->
+    <Color x:Key="AccentBrightColor">#34D399</Color>
+    <Color x:Key="AccentColor">#10B981</Color>
+    <Color x:Key="AccentDeepColor">#059669</Color>
+    <Brush x:Key="AccentBright">#34D399</Brush>
+    <Brush x:Key="AccentVivid">#10B981</Brush>
+    <Brush x:Key="AccentDeep">#059669</Brush>
+    <Brush x:Key="AccentInk">#052E22</Brush>
+    <Brush x:Key="AccentSoft">#1A10B981</Brush>
+    <Brush x:Key="AccentFaint">#0D10B981</Brush>
+    <LinearGradientBrush x:Key="AccentGradient" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#34D399" Offset="0" />
+        <GradientStop Color="#10B981" Offset="1" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="AccentGradientHover" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#6EE7B7" Offset="0" />
+        <GradientStop Color="#34D399" Offset="1" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="AccentGradientPressed" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#10B981" Offset="0" />
+        <GradientStop Color="#059669" Offset="1" />
+    </LinearGradientBrush>
+
+    <!-- Log / status level colors. -->
+    <Brush x:Key="InfoDot">#38BDF8</Brush>
+    <Brush x:Key="SuccessDot">#34D399</Brush>
+    <Brush x:Key="WarnDot">#FBBF24</Brush>
+    <Brush x:Key="ErrorDot">#F87171</Brush>
+    <Brush x:Key="InfoSoft">#2238BDF8</Brush>
+    <Brush x:Key="SuccessSoft">#2234D399</Brush>
+    <Brush x:Key="WarnSoft">#22FBBF24</Brush>
+    <Brush x:Key="ErrorSoft">#22F87171</Brush>
 </ResourceDictionary>

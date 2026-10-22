@@ -6,46 +6,66 @@
              xmlns:local="clr-namespace:WandEnhancer.View.Controls"
              mc:Ignorable="d"
              Visibility="Collapsed">
-    <Border x:Name="Splash" Background="Black" CornerRadius="7"
-            Opacity="0.45"
+    <Border x:Name="Splash" Background="Black" CornerRadius="12"
+            Opacity="0.55"
             MouseLeftButtonDown="HidePopup"/>
-    
-    <Border Background="{DynamicResource Background}" d:Margin="0"
-            Margin="0 40 0 40" x:Name="PopupPresenter" Width="Auto" Height="Auto"
-            BorderBrush="{DynamicResource Border}" BorderThickness="1" MinWidth="300"
-            VerticalAlignment="Center" HorizontalAlignment="Center" CornerRadius="4" Padding="15 10 10 15">
+
+    <Border x:Name="PopupPresenter" Width="Auto" Height="Auto"
+            VerticalAlignment="Center" HorizontalAlignment="Center"
+            Background="{DynamicResource Background}"
+            BorderBrush="{DynamicResource BorderStrong}"
+            BorderThickness="1" MinWidth="300"
+            CornerRadius="12" Padding="22 16 22 18">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="30" ShadowDepth="0" Color="Black" Opacity="0.6"
+                              RenderingBias="Quality"/>
+        </Border.Effect>
+
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition/>
             </Grid.RowDefinitions>
-            <Button BorderThickness="0" BorderBrush="Transparent"
-                Tag="{StaticResource CloseIcon}"
-                Width="25" Height="25" Padding="8" Background="Transparent"
-                HorizontalAlignment="Right" VerticalAlignment="Top" Click="HidePopup"
-                x:Name="cancel">
+
+            <Button Grid.Row="0" x:Name="cancel" HorizontalAlignment="Right"
+                    Tag="{StaticResource CloseIcon}"
+                    Width="26" Height="26" Padding="7"
+                    VerticalAlignment="Top"
+                    Click="HidePopup">
+                <Button.Resources>
+                    <CornerRadius x:Key="CornerRadius">8 8 8 8</CornerRadius>
+                </Button.Resources>
                 <Button.Style>
                     <Style BasedOn="{StaticResource IconButton}" TargetType="Button">
-                        <Setter Property="Foreground" Value="{DynamicResource MutedForeground}"/>
                         <Style.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Foreground" Value="{DynamicResource Foreground}"/>
+                                <Setter Property="Background" Value="{DynamicResource ErrorSoft}"/>
+                                <Setter Property="BorderBrush" Value="Transparent"/>
+                                <Setter Property="Foreground" Value="{DynamicResource ErrorDot}"/>
                             </Trigger>
                         </Style.Triggers>
                     </Style>
                 </Button.Style>
             </Button>
-            
-            <StackPanel Grid.Row="0" x:Name="TitleContainer" Orientation="Horizontal">
-                <TextBlock x:Name="Title" Foreground="{DynamicResource Foreground}"
-                           HorizontalAlignment="Left" FontWeight="Bold" FontSize="16" 
-                           VerticalAlignment="Bottom"/>
-            </StackPanel>
-            
-            <ContentPresenter x:Name="Presenter" Margin="0 20 0 0"
-                              Content="{Binding PopupContent}" Grid.Row="2"/>
 
+            <StackPanel Grid.Row="1" x:Name="TitleContainer" Orientation="Horizontal"
+                        Margin="0 0 30 12">
+                <Border Width="4" CornerRadius="2" Margin="0 2 0 2"
+                        Background="{DynamicResource AccentGradient}"/>
+                <TextBlock x:Name="Title" Style="{StaticResource Label}"
+                           Margin="10 0 0 0" FontSize="17" FontWeight="SemiBold"
+                           VerticalAlignment="Center" HorizontalAlignment="Left"
+                           TextAlignment="Left"
+                           TextWrapping="Wrap"
+                           Text="Popup"/>
+            </StackPanel>
+
+            <ScrollViewer Grid.Row="2"
+                          VerticalScrollBarVisibility="Hidden"
+                          HorizontalScrollBarVisibility="Disabled">
+                <ContentPresenter x:Name="Presenter" Content="{Binding PopupContent}"/>
+            </ScrollViewer>
         </Grid>
     </Border>
 </Grid>
