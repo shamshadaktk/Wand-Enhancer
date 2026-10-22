@@ -61,7 +61,7 @@ type CommandHandler = (args: {
 
 type ClientMessage = {
     type?: string;
-    requestId?: string | number | null;
+    requestId?: string | null;
     payload?: Record<string, unknown>;
 };
 

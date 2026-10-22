@@ -46,9 +46,9 @@ function normalizeArgs(args: unknown): CheatArgs {
 
     const a = args as UnknownRecord;
     const next: CheatArgs = {};
-    if (typeof a.min === 'number') next.min = a.min;
-    if (typeof a.max === 'number') next.max = a.max;
-    if (typeof a.step === 'number') next.step = a.step;
+    if (typeof a.min === 'number' && Number.isFinite(a.min)) next.min = a.min;
+    if (typeof a.max === 'number' && Number.isFinite(a.max)) next.max = a.max;
+    if (typeof a.step === 'number' && Number.isFinite(a.step) && a.step > 0) next.step = a.step;
     if (typeof a.postfix === 'string') next.postfix = a.postfix;
     if (
         typeof a.default === 'string' ||
@@ -170,11 +170,13 @@ function normalizeInstalledApp(app: unknown): InstalledAppSummary | null {
             a.headerImageUrl,
         ),
         platformLastPlayedTimestamp:
-            typeof a.platformLastPlayedTimestamp === 'number'
+            typeof a.platformLastPlayedTimestamp === 'number' &&
+            Number.isFinite(a.platformLastPlayedTimestamp)
                 ? a.platformLastPlayedTimestamp
                 : null,
         platformTotalPlaytimeMinutes:
-            typeof a.platformTotalPlaytimeMinutes === 'number'
+            typeof a.platformTotalPlaytimeMinutes === 'number' &&
+            Number.isFinite(a.platformTotalPlaytimeMinutes)
                 ? a.platformTotalPlaytimeMinutes
                 : null,
     };
@@ -269,10 +271,10 @@ function normalizeSnapshot(
         },
         trainer: {
             trainerId,
-            gameId: safeString(trainerInfo?.gameId || info.gameId),
-            displayName: displayName || safeString(trainerInfo?.gameId || info.gameId, trainerId),
-            titleId: typeof info.titleId === 'string' ? info.titleId : null,
-            gameVersion: typeof snap.gameVersion === 'string' ? snap.gameVersion : null,
+            gameId: toStringId(trainerInfo?.gameId || info.gameId) ?? '',
+            displayName: displayName || toStringId(trainerInfo?.gameId || info.gameId) || trainerId,
+            titleId: toStringId(info.titleId) ?? toStringId(trainerInfo?.titleId),
+            gameVersion: toStringId(snap.gameVersion),
             trainerLoading: snap.trainerLoading === true,
             gameInstalled: snap.gameInstalled !== false,
             needsCompatibilityWarning: snap.needsCompatibilityWarning === true,

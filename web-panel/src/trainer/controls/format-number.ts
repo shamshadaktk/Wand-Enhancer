@@ -26,7 +26,13 @@ export function numericValue(value: unknown, fallback: number): number {
         return fallback;
     }
 
-    const parsed = Number(stripNumberGrouping(value));
+    // Number('') is 0, so blank input must fall back instead of becoming zero.
+    const stripped = stripNumberGrouping(value);
+    if (!stripped.trim()) {
+        return fallback;
+    }
+
+    const parsed = Number(stripped);
     return Number.isFinite(parsed) ? parsed : fallback;
 }
 

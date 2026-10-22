@@ -98,6 +98,7 @@ export function remoteSessionReducer(
                 connectionStatus: EConnectionStatus.Idle,
                 trainerMeta: null,
                 gameStatus: null,
+                installedApps: [],
                 values: {},
                 confirmedValues: {},
                 pendingWrites: {},
@@ -185,9 +186,18 @@ function applyWriteResult(
     delete pendingWrites[action.target];
 
     if (action.ok) {
+        // A value delta may have confirmed a different (e.g. clamped) value after the
+        // write started. Only fall back to the optimistic value when nothing newer
+        // arrived, otherwise a clamped value would snap back to the requested one.
+        const confirmed = Object.is(
+            state.confirmedValues[action.target],
+            pending.previousConfirmedValue,
+        )
+            ? pending.value
+            : state.confirmedValues[action.target];
         return {
             ...state,
-            confirmedValues: { ...state.confirmedValues, [action.target]: pending.value },
+            confirmedValues: { ...state.confirmedValues, [action.target]: confirmed },
             pendingWrites,
         };
     }

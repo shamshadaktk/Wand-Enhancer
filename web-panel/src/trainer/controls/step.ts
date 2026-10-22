@@ -18,6 +18,13 @@ export function decimalPlaces(step: number): number {
 }
 
 export function clampToStep(value: number, min: number, max: number, step: number): number {
+    if (!Number.isFinite(value)) {
+        return min;
+    }
+    // A missing or invalid step disables snapping instead of producing NaN.
+    if (!Number.isFinite(step) || step <= 0) {
+        return Math.max(min, Math.min(max, value));
+    }
     const snapped = min + Math.round((value - min) / step) * step;
     const precision = Math.max(decimalPlaces(min), decimalPlaces(step));
     return Math.max(min, Math.min(max, Number(snapped.toFixed(precision))));

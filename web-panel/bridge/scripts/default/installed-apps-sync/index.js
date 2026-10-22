@@ -180,10 +180,9 @@ async function syncInstalledApps(state, force = false) {
         return false;
     }
 
-    state.lastSignature = signature;
-
     const sent = await invokeIpc(state, SYNC_CHANNEL, snapshot, 'Installed apps snapshot', 'error');
     if (sent) {
+        state.lastSignature = signature;
         state.log(
             'info',
             'Installed apps snapshot sent.',

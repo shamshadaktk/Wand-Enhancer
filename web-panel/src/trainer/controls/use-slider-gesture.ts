@@ -55,8 +55,21 @@ export function useSliderGesture(
         },
         onPointerMove: move,
         onPointerUp(event: PointerEvent<HTMLDivElement>) {
-            if (gesture.current?.pointerId !== event.pointerId) return;
-            move(event);
+            const start = gesture.current;
+            if (!start || start.pointerId !== event.pointerId) return;
+            if (!start.dragging && !disabled) {
+                // A tap without a drag jumps straight to the tapped position.
+                const rect = event.currentTarget.getBoundingClientRect();
+                if (rect.width > 0) {
+                    const ratio = Math.max(
+                        0,
+                        Math.min(1, (event.clientX - rect.left) / rect.width),
+                    );
+                    onChange(clampToStep(min + ratio * (max - min), min, max, step));
+                }
+            } else {
+                move(event);
+            }
             gesture.current = null;
         },
         onPointerCancel() {

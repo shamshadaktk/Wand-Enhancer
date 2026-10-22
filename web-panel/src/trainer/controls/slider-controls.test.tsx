@@ -85,10 +85,15 @@ describe('slider controls', () => {
         expect((input as HTMLInputElement).value).toBe('10');
     });
 
-    it('ignores taps, small movements and vertical scrolling', () => {
+    it('jumps to the tapped position', () => {
         const { onChange, track } = setup();
         pointer(track, 'pointerdown', 180, 0);
         pointer(track, 'pointerup', 180, 0);
+        expect(onChange).toHaveBeenLastCalledWith(900);
+    });
+
+    it('ignores vertical scrolling', () => {
+        const { onChange, track } = setup();
         pointer(track, 'pointerdown', 100, 0);
         pointer(track, 'pointermove', 103, 2);
         pointer(track, 'pointermove', 105, 20);

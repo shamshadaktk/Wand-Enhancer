@@ -81,6 +81,27 @@ describe('remote session reducer', () => {
         expect(state.confirmedValues.speed).toBe(true);
     });
 
+    it('keeps a clamped delta when the write result arrives late', () => {
+        let state = withConfirmedValue(1);
+        state = remoteSessionReducer(state, {
+            type: 'writeStarted',
+            target: 'speed',
+            value: 100,
+            requestId: 'new',
+        });
+        state = remoteSessionReducer(state, { type: 'valueChanged', target: 'speed', value: 99 });
+        state = remoteSessionReducer(state, {
+            type: 'writeResult',
+            target: 'speed',
+            requestId: 'new',
+            ok: true,
+        });
+
+        expect(state.confirmedValues.speed).toBe(99);
+        expect(state.values.speed).toBe(99);
+        expect(state.pendingWrites.speed).toBeUndefined();
+    });
+
     it('rolls back only the current rejected request', () => {
         let state = withConfirmedValue(1);
         state = remoteSessionReducer(state, {

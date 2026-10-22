@@ -77,9 +77,10 @@ export function useRemoteSession() {
                     reconnecting:
                         stateRef.current.connectionStatus === EConnectionStatus.Reconnecting,
                 }),
-            onTransportOpen: () => {
-                reconnectAttemptRef.current = 0;
-            },
+            // Attempts reset on hello_ack (see below), not on TCP open: a bridge that
+            // accepts the socket and drops it immediately would otherwise defeat the
+            // backoff and reconnect at full rate forever.
+            onTransportOpen: () => {},
             onMessage: (message) => {
                 const action = protocolAction(message);
                 if (!action) return;
@@ -178,6 +179,15 @@ export function useRemoteSession() {
     useEffect(() => {
         connectRef.current = connect;
     }, [connect]);
+
+    // A completed handshake proves the bridge is healthy; only then is the
+    // reconnect backoff allowed to start over.
+    const isConnected = state.connectionStatus === EConnectionStatus.Connected;
+    useEffect(() => {
+        if (isConnected) {
+            reconnectAttemptRef.current = 0;
+        }
+    }, [isConnected]);
 
     useEffect(() => {
         const onVisibilityChange = () => {

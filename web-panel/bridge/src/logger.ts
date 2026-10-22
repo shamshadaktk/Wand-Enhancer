@@ -6,6 +6,8 @@ const { BRIDGE_LOG_FILE_NAME } = require('./constants');
 
 import type { BridgeLogger, BridgeOptions, LogLevel } from './types';
 
+const MAX_LOG_BYTES = 512 * 1024;
+
 function writeLogLine(logFile: string, level: LogLevel, message: string, error?: unknown) {
     const method = level === 'error' ? 'error' : level === 'warn' ? 'warn' : 'info';
     const tag = `[wand-remote-bridge] ${message}`;
@@ -16,6 +18,7 @@ function writeLogLine(logFile: string, level: LogLevel, message: string, error?:
     } catch {}
 
     try {
+        rotateLogFile(logFile);
         const detail = error
             ? ` :: ${error && typeof error === 'object' && 'stack' in error ? String(error.stack) : String(error)}`
             : '';
@@ -23,6 +26,22 @@ function writeLogLine(logFile: string, level: LogLevel, message: string, error?:
             logFile,
             `[${new Date().toISOString()}] [${level}] ${message}${detail}\n`,
         );
+    } catch {}
+}
+
+// One previous generation is kept; failures fall through to a plain append.
+function rotateLogFile(logFile: string) {
+    try {
+        const stats = fs.statSync(logFile);
+        if (!stats.isFile() || stats.size <= MAX_LOG_BYTES) {
+            return;
+        }
+
+        const previous = `${logFile}.prev`;
+        try {
+            fs.unlinkSync(previous);
+        } catch {}
+        fs.renameSync(logFile, previous);
     } catch {}
 }
 

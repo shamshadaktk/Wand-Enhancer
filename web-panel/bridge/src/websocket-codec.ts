@@ -23,7 +23,7 @@ function protocolError(message: string) {
     return error;
 }
 
-function jsonMessage(type: string, payload: unknown, requestId: string | number | null = null) {
+function jsonMessage(type: string, payload: unknown, requestId: string | null = null) {
     return JSON.stringify({
         type,
         version: BRIDGE_PROTOCOL_VERSION,
@@ -70,7 +70,7 @@ function sendJson(
     client: BridgeClient,
     type: string,
     payload: unknown,
-    requestId: string | number | null = null,
+    requestId: string | null = null,
 ) {
     sendText(client, jsonMessage(type, payload, requestId));
 }

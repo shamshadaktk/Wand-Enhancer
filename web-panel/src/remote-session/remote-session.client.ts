@@ -36,22 +36,34 @@ export class RemoteSessionClient {
         const socket = new WebSocket(this.url);
         this.socket = socket;
 
+        // Stale sockets from an earlier connect() must not drive the new session.
+        const isCurrent = () => this.socket === socket;
         socket.addEventListener('open', () => {
+            if (!isCurrent()) {
+                return;
+            }
             this.handlers.onTransportOpen();
             this.send(this.createHelloMessage());
         });
-        socket.addEventListener('message', (event) => this.handleMessage(event));
-        socket.addEventListener('close', () => {
-            if (this.socket === socket) {
-                this.socket = null;
+        socket.addEventListener('message', (event) => {
+            if (isCurrent()) {
+                this.handleMessage(event);
             }
+        });
+        socket.addEventListener('close', () => {
+            if (!isCurrent()) {
+                return;
+            }
+            this.socket = null;
             if (!this.intentionalDisconnect) {
                 this.handlers.onClose();
             }
         });
-        socket.addEventListener('error', () =>
-            this.handlers.onError('WebSocket connection failed.'),
-        );
+        socket.addEventListener('error', () => {
+            if (isCurrent()) {
+                this.handlers.onError('WebSocket connection failed.');
+            }
+        });
     }
 
     disconnect(): void {

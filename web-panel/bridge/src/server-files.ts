@@ -165,8 +165,8 @@ function isVirtualMac(mac: unknown) {
 // so a blocking read would stall trainer updates for everyone.
 /**
  * Resolves a request path inside `root`, or null when it escapes.
- * Today's routing happens to be safe only because pathnames are never percent-decoded;
- * decoding without this check would turn `%2e%2e%2f` into a real traversal.
+ * The path is percent-decoded and then containment-checked, so an encoded
+ * traversal such as `%2e%2e%2f` resolves outside the root and is rejected.
  */
 function resolveInsideRoot(root: string, relativePath: string): string | null {
     const decoded = safeDecode(relativePath);

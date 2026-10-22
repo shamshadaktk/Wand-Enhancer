@@ -14,12 +14,16 @@ function normalizeGameStatusSnapshot(rawSnapshot: unknown): GameStatusPayload | 
         session: {
             state: rawSession.state === 'running' ? 'running' : 'idle',
             event: safeString(rawSession.event, 'snapshot'),
-            processId: typeof rawSession.processId === 'number' ? rawSession.processId : null,
+            processId:
+                typeof rawSession.processId === 'number' && Number.isFinite(rawSession.processId)
+                    ? rawSession.processId
+                    : null,
             gameId: toStringId(rawSession.gameId),
             titleId: toStringId(rawSession.titleId),
             titleName: typeof rawSession.titleName === 'string' ? rawSession.titleName : null,
             sessionDurationSeconds:
-                typeof rawSession.sessionDurationSeconds === 'number'
+                typeof rawSession.sessionDurationSeconds === 'number' &&
+                Number.isFinite(rawSession.sessionDurationSeconds)
                     ? rawSession.sessionDurationSeconds
                     : null,
             startedAt: typeof rawSession.startedAt === 'string' ? rawSession.startedAt : null,

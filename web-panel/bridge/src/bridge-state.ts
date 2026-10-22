@@ -38,7 +38,7 @@ const { sendJson } = require('./websocket-codec') as {
         client: BridgeClient,
         type: string,
         payload: unknown,
-        requestId?: string | number | null,
+        requestId?: string | null,
     ) => void;
 };
 
@@ -114,7 +114,8 @@ function createBridgeState({ clients, log, getServerInfo }: BridgeStateOptions) 
         const snapshot = currentSnapshot;
         if (!snapshot || !isRecord(change)) return;
         const target = safeString(change.target);
-        if (!target) return;
+        // Unknown targets would otherwise linger as phantom cheats in panel state.
+        if (!target || !(target in snapshot.trainerValues.values)) return;
 
         if (safeString(change.trainerId) !== snapshot.trainerMeta.trainer.trainerId) return;
 
