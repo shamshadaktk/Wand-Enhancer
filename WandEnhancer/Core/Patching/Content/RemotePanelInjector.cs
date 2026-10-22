@@ -49,7 +49,12 @@ namespace WandEnhancer.Core.Patching.Content
 
             if (CopyEmbeddedDirectory(EmbeddedRemotePanelDistPrefix, targetRoot) == 0)
             {
+#if DEBUG
+                // Developer loop: patch straight from a source checkout without embedding assets.
                 AsarSharp.Utils.Extensions.CopyDirectory(FindWorkspacePath(WebPanelDirectoryName, WebPanelDistDirectoryName), targetRoot);
+#else
+                throw new FileNotFoundException("[ENHANCER] Remote panel assets are missing from the application. Reinstall Wand-Enhancer.", targetRoot);
+#endif
             }
 
             if (!File.Exists(targetBridgePath))

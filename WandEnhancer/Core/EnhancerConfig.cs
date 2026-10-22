@@ -148,7 +148,8 @@ namespace WandEnhancer.Core
         /// <summary>Wraps the account-returning promise so the resolved account always reports an active subscription.</summary>
         private static JsEdit[] ForceProSubscription(JsCursor js, string methodName)
         {
-            return Edits(js.FindFunction(methodName)?.WrapReturn(PatchPayload.Load("pro-subscription")));
+            var method = js.FindFunction(methodName);
+            return method == null ? null : method.WrapAllReturns(PatchPayload.Load("pro-subscription"));
         }
 
         private static JsEdit[] LocateAccountReducer(JsCursor js)
@@ -223,9 +224,11 @@ namespace WandEnhancer.Core
                 return null;
             }
 
+            RequireStatementCall(js, sendOpen, "client-state send");
+
             var method = js.EnclosingFunction(sendOpen);
-            int snapshotOpen = js.IndexOf("{", sendOpen);
-            int snapshotClose = js.MatchClose(snapshotOpen);
+            int snapshotOpen = FindDirectObjectArgument(js, sendOpen, js.MatchClose(sendOpen));
+            int snapshotClose = snapshotOpen < 0 ? -1 : js.MatchClose(snapshotOpen);
             if (method == null || snapshotOpen < 0 || snapshotClose < 0)
             {
                 throw new Exception("client-state payload object could not be located");
@@ -235,6 +238,10 @@ namespace WandEnhancer.Core
             string snapshot = js.Text.Substring(snapshotOpen + 1, snapshotClose - snapshotOpen - 1)
                 .Trim()
                 .TrimEnd(',');
+            if (snapshot.Length == 0)
+            {
+                throw new Exception("client-state payload object is empty");
+            }
 
             var payload = PatchPayload.Load(
                 "remote-bridge-sync",
@@ -292,6 +299,78 @@ namespace WandEnhancer.Core
             return string.CompareOrdinal(js.Text, afterBlock, "else", 0, 4) == 0;
         }
 
+        /// <summary>
+        /// The sync call is appended right after the send, so the send must be a
+        /// statement-level expression. A send nested in another call's arguments (or
+        /// used as a return value) would silently change meaning after the splice.
+        /// </summary>
+        private static void RequireStatementCall(JsCursor js, int callOpen, string what)
+        {
+            var stack = js.OpenerStack(callOpen);
+            if (stack.Count > 0 && js.Text[stack[0]] != '{')
+            {
+                throw new Exception($"{what} is nested inside another expression; refusing to splice after it");
+            }
+
+            int calleeStart = callOpen;
+            while (calleeStart > 0 && IsCalleeChar(js.Text[calleeStart - 1]))
+            {
+                calleeStart--;
+            }
+
+            int before = js.SkipWhitespaceBack(calleeStart - 1);
+            if (before < 0)
+            {
+                return;
+            }
+
+            char preceding = js.Text[before];
+            if (preceding == '(' || preceding == '[' || preceding == ':' || preceding == '?' || preceding == '>')
+            {
+                throw new Exception($"{what} is nested inside another expression; refusing to splice after it");
+            }
+
+            if (preceding == '_' || preceding == '$' || char.IsLetter(preceding))
+            {
+                int wordEnd = before;
+                while (before > 0 && IsWordChar(js.Text[before - 1]))
+                {
+                    before--;
+                }
+
+                string word = js.Text.Substring(before, wordEnd - before + 1);
+                if (word == "return" || word == "case")
+                {
+                    throw new Exception($"{what} is a {word} value; refusing to splice after it");
+                }
+            }
+        }
+
+        /// <summary>First `{` that is a direct argument of the call, skipping braces nested in earlier arguments.</summary>
+        private static int FindDirectObjectArgument(JsCursor js, int callOpen, int callClose)
+        {
+            if (callClose < 0)
+            {
+                return -1;
+            }
+
+            for (int brace = js.IndexOf("{", callOpen); brace >= 0 && brace < callClose; brace = js.IndexOf("{", brace + 1))
+            {
+                int before = js.SkipWhitespaceBack(brace - 1);
+                if (before >= 0 && js.Text[before] == ',' && js.EnclosingOpener(brace, '(') == callOpen)
+                {
+                    return brace;
+                }
+            }
+
+            return -1;
+        }
+
+        private static bool IsWordChar(char value)
+        {
+            return char.IsLetterOrDigit(value) || value == '_' || value == '$';
+        }
+
         private static JsEdit[] LocateBridgeBindHandler(JsCursor js)
         {
             var method = js.FindFunction("setCurrentTrainer");
@@ -316,7 +395,7 @@ namespace WandEnhancer.Core
                 throw new Exception("Remote value handler could not be located");
             }
 
-            var setValue = MatchExactlyOnce(RemoteSetValue, handlerMethod.Body, "Remote setValue call");
+            SetValueCall setValue = ResolveRemoteSetValue(handlerMethod);
             var parameter = MatchExactlyOnce(
                 new Regex(@"setCurrentTrainer\(\s*(?<info>[\w$]+)"),
                 js.Text.Substring(method.Start, method.BodyOpen - method.Start),
@@ -324,9 +403,9 @@ namespace WandEnhancer.Core
 
             return Edits(method.InsertAtStart(PatchPayload.Load(
                 "remote-bridge-renderer",
-                "trainer", setValue.Groups["trainer"].Value,
+                "trainer", setValue.Trainer,
                 "trainerInfo", parameter.Groups["info"].Value,
-                "remoteSource", setValue.Groups["source"].Value)));
+                "remoteSource", setValue.Source)));
         }
 
         private static JsEdit[] LocateBridgeValueDelta(JsCursor js)
@@ -343,6 +422,13 @@ namespace WandEnhancer.Core
                 subscription.Body.IndexOf(".onValueSet(", StringComparison.Ordinal) < 0)
             {
                 throw new Exception("Trainer value subscription could not be located");
+            }
+
+            // The trainer id is read from the snapshot method but injected into the
+            // subscription method; both must live in the same class for `this.#x` to resolve.
+            if (js.EnclosingOpener(subscription.Start, '{') != js.EnclosingOpener(snapshot.Start, '{'))
+            {
+                throw new Exception("Trainer value subscription lives in a different class than the client-state snapshot");
             }
 
             // Capture at subscription time so a late callback cannot impersonate the next trainer.
@@ -399,7 +485,133 @@ namespace WandEnhancer.Core
 
         private static readonly Regex WhenReady = new Regex(@"(?<app>[\w$]+)\.whenReady\(\)\.then\(");
         private static readonly Regex WhenReadyThenRun = new Regex(@"(?<app>[\w$]+)\.whenReady\(\)\.then\(run\)");
-        private static readonly Regex RemoteSetValue =
-            new Regex(@"this\.(?<trainer>#[\w$]+)\.setValue\(\s*(?<change>[\w$]+)\.name\s*,\s*\k<change>\.value\s*,\s*(?<source>[^,]+?)\s*,");
+        private sealed class SetValueCall
+        {
+            public string Trainer;
+            public string Source;
+        }
+
+        /// <summary>
+        /// Parses the handler's <c>setValue(name, value, source, ...)</c> call with balanced
+        /// delimiters, so a source expression containing commas (or nested calls) is kept
+        /// whole. Matching up to the next comma would silently truncate it.
+        /// </summary>
+        private static SetValueCall ResolveRemoteSetValue(JsFunction handlerMethod)
+        {
+            var body = new JsCursor(handlerMethod.Body);
+            SetValueCall found = null;
+            foreach (Match head in RemoteSetValueHead.Matches(handlerMethod.Body))
+            {
+                SetValueCall candidate = TryParseSetValue(body, head);
+                if (candidate == null)
+                {
+                    continue;
+                }
+
+                if (found != null)
+                {
+                    throw new Exception("Remote setValue call matched more than once; cannot tell which call site is the right one");
+                }
+
+                found = candidate;
+            }
+
+            if (found == null)
+            {
+                throw new Exception("Remote setValue call could not be located");
+            }
+
+            return found;
+        }
+
+        private static SetValueCall TryParseSetValue(JsCursor body, Match head)
+        {
+            int callOpen = head.Index + head.Length - 1;
+            int callClose = body.MatchClose(callOpen);
+            if (callClose < 0)
+            {
+                return null;
+            }
+
+            string[] args = SplitTopLevel(body.Text.Substring(callOpen + 1, callClose - callOpen - 1));
+            if (args.Length < 3)
+            {
+                return null;
+            }
+
+            var name = Regex.Match(args[0].Trim(), @"^(?<change>[\w$]+)\.name$");
+            var value = Regex.Match(args[1].Trim(), @"^(?<change>[\w$]+)\.value$");
+            if (!name.Success || !value.Success || name.Groups["change"].Value != value.Groups["change"].Value)
+            {
+                return null;
+            }
+
+            return new SetValueCall { Trainer = head.Groups["trainer"].Value, Source = args[2].Trim() };
+        }
+
+        /// <summary>Splits call arguments on commas that are not nested in delimiters, strings, or comments.</summary>
+        private static string[] SplitTopLevel(string args)
+        {
+            var cursor = new JsCursor(args);
+            var parts = new List<string>();
+            int start = 0;
+            for (int index = 0; index < args.Length; index++)
+            {
+                char current = args[index];
+                if (current == '"' || current == '\'' || current == '`')
+                {
+                    index = SkipQuoted(args, index);
+                    continue;
+                }
+
+                if (current == '/' && index + 1 < args.Length && (args[index + 1] == '/' || args[index + 1] == '*'))
+                {
+                    index = SkipComment(args, index);
+                    continue;
+                }
+
+                if (current == ',' && cursor.OpenerStack(index).Count == 0)
+                {
+                    parts.Add(args.Substring(start, index - start));
+                    start = index + 1;
+                }
+            }
+
+            parts.Add(args.Substring(start));
+            return parts.ToArray();
+        }
+
+        private static int SkipQuoted(string text, int index)
+        {
+            char quote = text[index];
+            for (int cursor = index + 1; cursor < text.Length; cursor++)
+            {
+                if (text[cursor] == '\\')
+                {
+                    cursor++;
+                }
+                else if (text[cursor] == quote)
+                {
+                    return cursor;
+                }
+            }
+
+            return text.Length;
+        }
+
+        private static int SkipComment(string text, int index)
+        {
+            if (text[index + 1] == '/')
+            {
+                int lineEnd = text.IndexOf('\n', index);
+                return lineEnd < 0 ? text.Length : lineEnd;
+            }
+
+            int commentEnd = text.IndexOf("*/", index + 2, StringComparison.Ordinal);
+            return commentEnd < 0 ? text.Length : commentEnd + 1;
+        }
+
+        private static readonly Regex RemoteSetValueHead =
+            new Regex(@"this\.(?<trainer>#[\w$]+)\.setValue\s*\(");
     }
 }

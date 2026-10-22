@@ -165,15 +165,17 @@ namespace WandEnhancer.View.MainWindow
                     try
                     {
                         new Enhancer(WeModInfo, Log, config).Patch();
-                        AlreadyPatched = true;
-                        CanRestore = true;
                     }
                     catch (Exception e)
                     {
                         Log(LocalizationManager.Format("log_patch_failed", e.Message), ELogType.Error);
-                        IsPatchEnabled = true;
                     }
                 });
+                // Refresh from disk on the UI thread: a failed run can leave backups
+                // behind, so the flags must reflect reality instead of assumptions.
+                AlreadyPatched = Enhancer.IsPatched(WeModInfo.RootDirectory);
+                CanRestore = Enhancer.HasBackup(WeModInfo.RootDirectory);
+                IsPatchEnabled = !AlreadyPatched;
                 IsBusy = false;
             }), LocalizationManager.Get("pv_popup_title"));
         }

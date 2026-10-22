@@ -91,6 +91,10 @@ Invoke-Step 'Lint web-panel' {
     & $pnpm --dir $webPanelDir run lint
 }
 
+Invoke-Step 'Validate localization placeholders' {
+    & (Join-Path $repoRoot 'scripts\validate-locales.ps1')
+}
+
 Invoke-Step 'Build web-panel' {
     & $pnpm --dir $webPanelDir run build
 }

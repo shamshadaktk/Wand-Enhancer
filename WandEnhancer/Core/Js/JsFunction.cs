@@ -65,29 +65,40 @@ namespace WandEnhancer.Core.Js
         /// </summary>
         public JsEdit WrapReturn(string wrapper)
         {
+            var edits = WrapAllReturns(wrapper);
+            return edits[edits.Length - 1];
+        }
+
+        /// <summary>
+        /// Rewrites every top-level <c>return X</c> as <c>return WRAPPER</c> (using <c>$0</c>).
+        /// Wrapping only one return would leave the other exits unpatched.
+        /// </summary>
+        public JsEdit[] WrapAllReturns(string wrapper)
+        {
             var body = BodyCursor;
-            int keywordEnd = -1;
+            var edits = new System.Collections.Generic.List<JsEdit>();
             for (var match = ReturnKeyword.Match(body.Text); match.Success; match = match.NextMatch())
             {
-                if (body.OpenerStack(match.Index).Count == 0)
+                if (body.OpenerStack(match.Index).Count != 0)
                 {
-                    keywordEnd = match.Index + match.Length;
+                    continue;
                 }
+
+                int expressionStart = body.SkipWhitespaceForward(match.Index + match.Length);
+                int expressionEnd = FindStatementEnd(body, expressionStart);
+                string expression = body.Text.Substring(expressionStart, expressionEnd - expressionStart);
+                edits.Add(new JsEdit(
+                    BodyOpen + 1 + expressionStart,
+                    BodyOpen + 1 + expressionEnd,
+                    wrapper.Replace("$0", $"({expression})")));
             }
 
-            if (keywordEnd < 0)
+            if (edits.Count == 0)
             {
                 throw new Exception($"No top-level return statement in {Name}()");
             }
 
-            int expressionStart = body.SkipWhitespaceForward(keywordEnd);
-            int expressionEnd = FindStatementEnd(body, expressionStart);
-            string expression = body.Text.Substring(expressionStart, expressionEnd - expressionStart);
-
-            return new JsEdit(
-                BodyOpen + 1 + expressionStart,
-                BodyOpen + 1 + expressionEnd,
-                wrapper.Replace("$0", $"({expression})"));
+            return edits.ToArray();
         }
 
         private static int FindStatementEnd(JsCursor body, int start)

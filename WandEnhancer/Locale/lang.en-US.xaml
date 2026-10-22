@@ -57,6 +57,8 @@
     <s:String x:Key="pv_strategy_static">Static (recommended)</s:String>
     <s:String x:Key="pv_strategy_supervised">Supervised (runtime)</s:String>
     <s:String x:Key="pv_strategy_hint">Static edits Wand on disk, which breaks its digital signature. Supervised patches in memory at every launch - it can trip antivirus and may not work in every setup.</s:String>
+    <s:String x:Key="pv_no_patch_selected">Select at least one patch to apply.</s:String>
+    <s:String x:Key="pv_scripts_need_panel">The {0} selected custom script(s) are only injected with the Remote Web Panel. Enable it and continue?</s:String>
     <!--#endregion -->
 
     <!--#region Runtime log -->

@@ -41,7 +41,16 @@ namespace WandEnhancer.Core.Services
         /// <summary>Localized format string filled with <paramref name="args"/>.</summary>
         public static string Format(string key, params object[] args)
         {
-            return string.Format(Get(key), args);
+            string template = Get(key);
+            try
+            {
+                return string.Format(template, args);
+            }
+            catch (FormatException)
+            {
+                // A bad placeholder in a locale file must degrade the message, never crash the app.
+                return template + " [" + string.Join(", ", args ?? new object[0]) + "]";
+            }
         }
 
         public static CultureInfo CurrentLanguage

@@ -29,10 +29,7 @@ namespace WandEnhancer.Core.Patching.Shared
 
             try
             {
-                IntPtr groupName = FindFirstGroupName(source);
-                byte[] group = groupName == IntPtr.Zero
-                    ? null
-                    : LoadResourceBytes(source, groupName, (IntPtr)RT_GROUP_ICON);
+                byte[] group = LoadFirstGroupBytes(source);
                 if (group == null || group.Length < GroupHeader)
                 {
                     return false;
@@ -100,12 +97,14 @@ namespace WandEnhancer.Core.Patching.Shared
             return EndUpdateResource(update, false);
         }
 
-        private static IntPtr FindFirstGroupName(IntPtr module)
+        private static byte[] LoadFirstGroupBytes(IntPtr module)
         {
-            IntPtr found = IntPtr.Zero;
+            // The enumerated name is only valid during the callback (string names point
+            // at loader memory), so the bytes are copied before enumeration returns.
+            byte[] found = null;
             EnumResNameProc callback = (m, t, name, l) =>
             {
-                found = name;
+                found = LoadResourceBytes(m, name, t);
                 return false; // first group is the icon the shell shows; stop
             };
             EnumResourceNames(module, (IntPtr)RT_GROUP_ICON, callback, IntPtr.Zero);

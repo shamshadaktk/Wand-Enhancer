@@ -25,6 +25,10 @@ namespace WandEnhancer.Core.Js
                 "throw", "case", "do", "else", "yield", "await"
             };
 
+        // Only these can head a braceless body that is a regex statement (`if (x) /re/`).
+        private static readonly HashSet<string> ControlStatementKeywords =
+            new HashSet<string>(StringComparer.Ordinal) { "if", "for", "while", "with" };
+
         private readonly string _text;
 
         public JsCursor(string text)
@@ -364,7 +368,79 @@ namespace WandEnhancer.Core.Js
                 return true;
             }
 
+            // `if (x) /re/` - a regex statement as a braceless control body. Any other
+            // `)` (calls, grouping, arithmetic) means division.
+            if (_text[previous] == ')')
+            {
+                int openParen = MatchOpen(previous);
+                return openParen >= 0 && ControlStatementKeywords.Contains(NameBefore(openParen));
+            }
+
             return IsIdentifierChar(_text[previous]) && RegexPrecedingKeywords.Contains(WordEndingAt(previous));
+        }
+
+        /// <summary>Index of the opener matching the closer at <paramref name="closeIndex"/>, or -1.</summary>
+        private int MatchOpen(int closeIndex)
+        {
+            char close = _text[closeIndex];
+            char open = close == ')' ? '(' : close == ']' ? '[' : close == '}' ? '{' : '\0';
+            if (open == '\0')
+            {
+                return -1;
+            }
+
+            int depth = 0;
+            for (int index = closeIndex; index >= 0; index--)
+            {
+                char current = _text[index];
+                if (current == close)
+                {
+                    depth++;
+                }
+                else if (current == open)
+                {
+                    if (--depth == 0)
+                    {
+                        return index;
+                    }
+                }
+                else if (current == '"' || current == '\'' || current == '`')
+                {
+                    // Scanning back from code, the first quote hit closes a string.
+                    index = SkipStringBack(index, current);
+                    if (index < 0)
+                    {
+                        return -1;
+                    }
+                }
+            }
+
+            return -1;
+        }
+
+        /// <summary>Index of the quote opening the string that ends at <paramref name="index"/>, or -1.</summary>
+        private int SkipStringBack(int index, char quote)
+        {
+            for (int cursor = index - 1; cursor >= 0; cursor--)
+            {
+                if (_text[cursor] == quote && !IsEscaped(cursor))
+                {
+                    return cursor;
+                }
+            }
+
+            return -1;
+        }
+
+        private bool IsEscaped(int index)
+        {
+            int backslashes = 0;
+            for (int cursor = index - 1; cursor >= 0 && _text[cursor] == '\\'; cursor--)
+            {
+                backslashes++;
+            }
+
+            return (backslashes & 1) == 1;
         }
 
         /// <summary>The identifier ending at <paramref name="end"/> inclusive, or "" when there is none.</summary>

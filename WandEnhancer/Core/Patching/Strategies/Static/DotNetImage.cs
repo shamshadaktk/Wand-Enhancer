@@ -44,10 +44,18 @@ namespace WandEnhancer.Core.Patching.Strategies.Static
 
         public void Dispose() => _pe.Dispose();
 
-        /// File offset of the first IL byte of every method that calls the P/Invoke.
-        public IReadOnlyList<long> FindPInvokeCallerCodeOffsets(string importName)
+        /// <summary>A method calling the P/Invoke, with its decoded return type for stub selection.</summary>
+        public sealed class PInvokeCaller
         {
-            var hits = new List<long>();
+            public long IlOffset;
+            public byte ReturnTypeCode;
+            public bool ReturnTypeKnown;
+        }
+
+        /// Every method that calls the P/Invoke, with the return type a stub must satisfy.
+        public IReadOnlyList<PInvokeCaller> FindPInvokeCallers(string importName)
+        {
+            var hits = new List<PInvokeCaller>();
             int token = FindMethodToken(importName);
             if (token == 0)
             {
@@ -66,7 +74,9 @@ namespace WandEnhancer.Core.Patching.Strategies.Static
                 {
                     if (BodyCalls(_pe.GetMethodBody(rva).GetILBytes(), token))
                     {
-                        hits.Add(IlFileOffset(rva));
+                        bool known;
+                        byte code = ReadReturnTypeCode(handle, out known);
+                        hits.Add(new PInvokeCaller { IlOffset = IlFileOffset(rva), ReturnTypeCode = code, ReturnTypeKnown = known });
                     }
                 }
                 catch (BadImageFormatException)
@@ -76,6 +86,33 @@ namespace WandEnhancer.Core.Patching.Strategies.Static
             }
 
             return hits;
+        }
+
+        /// <summary>
+        /// ELEMENT_TYPE of the method's return type (custom modifiers skipped), for stub selection.
+        /// </summary>
+        private byte ReadReturnTypeCode(MethodDefinitionHandle handle, out bool known)
+        {
+            known = false;
+            try
+            {
+                BlobReader signature = _reader.GetBlobReader(_reader.GetMethodDefinition(handle).Signature);
+                signature.ReadSignatureHeader();
+                signature.ReadCompressedInteger(); // parameter count
+                byte code = signature.ReadByte();
+                while (code == 0x1F || code == 0x20) // modreq, modopt + token
+                {
+                    signature.ReadCompressedInteger();
+                    code = signature.ReadByte();
+                }
+
+                known = true;
+                return code;
+            }
+            catch (BadImageFormatException)
+            {
+                return 0;
+            }
         }
 
         private int FindMethodToken(string name)

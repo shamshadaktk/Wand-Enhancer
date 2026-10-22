@@ -236,6 +236,12 @@ namespace AsarSharp.Utils
 
             foreach (var dir in Directory.GetDirectories(sourceDir))
             {
+                // Junctions and symlinks can cycle back into the tree and hang the copy; skip them.
+                if ((new DirectoryInfo(dir).Attributes & FileAttributes.ReparsePoint) != 0)
+                {
+                    continue;
+                }
+
                 var destDir = Path.Combine(destinationDir, Path.GetFileName(dir));
                 CopyDirectory(dir, destDir);
             }

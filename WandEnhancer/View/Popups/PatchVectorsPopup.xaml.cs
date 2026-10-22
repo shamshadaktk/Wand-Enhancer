@@ -83,9 +83,29 @@ namespace WandEnhancer.View.Popups
             if (ActivateProBox.IsChecked != true && DisableUpdateBox.IsChecked != true &&
                 DevToolsHotkeyBox.IsChecked != true && RemoteWebPanelPreviewBox.IsChecked != true)
             {
+                MessageBox.Show(
+                    LocalizationManager.Get("pv_no_patch_selected"),
+                    LocalizationManager.Get("pv_popup_title"),
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
                 return;
             }
-            
+
+            if (_selectedScripts.Count > 0 && RemoteWebPanelPreviewBox.IsChecked != true)
+            {
+                var answer = MessageBox.Show(
+                    LocalizationManager.Format("pv_scripts_need_panel", _selectedScripts.Count),
+                    LocalizationManager.Get("pv_popup_title"),
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Question);
+                if (answer != MessageBoxResult.Yes)
+                {
+                    return;
+                }
+
+                RemoteWebPanelPreviewBox.IsChecked = true;
+            }
+
             var result = new HashSet<EPatchType>();
             if (ActivateProBox.IsChecked == true)
             {

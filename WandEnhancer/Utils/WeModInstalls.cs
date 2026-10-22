@@ -129,15 +129,27 @@ namespace WandEnhancer.Utils
                 {
                     Name = dirInfo.Name,
                     Path = dirInfo.FullName,
+                    Version = ParseAppVersion(dirInfo.Name),
                     LastModified = dirInfo.LastWriteTime
                 })
-                .OrderByDescending(item => item.LastModified)
+                .OrderByDescending(item => item.Version)
+                .ThenByDescending(item => item.LastModified)
                 .ToList();
-            
+
 
             return appFolders
                 .Select(folder => CheckWeModPath(folder.Path))
                 .FirstOrDefault(config => config != null);
+        }
+
+        /// <summary>Numeric version of an `app-1.2.3` folder, or 0.0 when it carries none.</summary>
+        private static Version ParseAppVersion(string folderName)
+        {
+            var match = Regex.Match(folderName, @"^app-(?<version>\d+(\.\d+){0,3})");
+            Version parsed;
+            return match.Success && Version.TryParse(match.Groups["version"].Value, out parsed)
+                ? parsed
+                : new Version(0, 0);
         }
     }
 }

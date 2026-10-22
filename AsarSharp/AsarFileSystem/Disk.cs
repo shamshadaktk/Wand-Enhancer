@@ -13,6 +13,9 @@ namespace AsarSharp.AsarFileSystem
     {
         private const int StreamBufferSize = 1024 * 1024;
 
+        // Real ASAR headers are kilobytes; a corrupt size field must not drive a huge allocation.
+        private const uint MaxHeaderSize = 256u * 1024u * 1024u;
+
         public class ArchiveHeader
         {
             public FilesystemEntry Header { get; set; }
@@ -44,6 +47,8 @@ namespace AsarSharp.AsarFileSystem
 
                 var sizePickle = Pickle.CreateFromBuffer(sizeBuf);
                 var size = sizePickle.CreateIterator().ReadUInt32();
+                if (size == 0 || size > MaxHeaderSize)
+                    throw new Exception("Invalid header size");
 
                 var headerBuf = new byte[size];
                 if (fs.ReadFull(headerBuf, 0, (int)size) != size)

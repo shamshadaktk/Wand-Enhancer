@@ -29,8 +29,9 @@ namespace WandEnhancer.Core.Patching.Shared
                 }
 
                 string backup = exePath + FuseBackupSuffix;
-                if (!File.Exists(backup))
+                if (!File.Exists(backup) || !BackupMatches(backup, (byte)original))
                 {
+                    // Re-baseline: a leftover backup from an older Wand would restore a stale byte.
                     File.WriteAllBytes(backup, new[] { (byte)original });
                 }
 
@@ -58,15 +59,38 @@ namespace WandEnhancer.Core.Patching.Shared
                 return;
             }
 
-            byte original = File.ReadAllBytes(backup)[0];
+            byte[] saved = File.ReadAllBytes(backup);
+            if (saved.Length == 0)
+            {
+                log?.Invoke($"[ENHANCER] Fuse backup {Path.GetFileName(backup)} is empty; cannot restore.", ELogType.Warn);
+                return;
+            }
+
             using (var stream = new FileStream(exePath, FileMode.Open, FileAccess.ReadWrite, FileShare.Read))
             {
                 stream.Position = offset;
-                stream.WriteByte(original);
+                stream.WriteByte(saved[0]);
             }
 
             log?.Invoke($"[ENHANCER] ASAR integrity fuse restored on disk in {Path.GetFileName(exePath)}.", ELogType.Info);
             File.Delete(backup);
+        }
+
+        private static bool BackupMatches(string backup, byte original)
+        {
+            try
+            {
+                byte[] saved = File.ReadAllBytes(backup);
+                return saved.Length > 0 && saved[0] == original;
+            }
+            catch (IOException)
+            {
+                return false;
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return false;
+            }
         }
     }
 }
